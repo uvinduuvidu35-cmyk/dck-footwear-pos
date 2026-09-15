@@ -294,7 +294,7 @@
             #printable-receipt {
                 position: absolute;
                 left: 0; top: 0;
-                width: 80mm; /* Standard POS Receipt Paper Width */
+                width: 80mm;
                 font-family: monospace;
                 font-size: 12px;
             }
@@ -307,18 +307,12 @@
     <div class="sidebar">
         <h2>DCK POS</h2>
         <ul>
-            <li><a href="dashboard.html"><i class="fa-solid fa-gauge"></i> Dashboard</a></li>
-            <li><a href="pos.html" class="active"><i class="fa-solid fa-cart-shopping"></i> POS</a></li>
+            <li><a href="dck dassh.html"><i class="fa-solid fa-gauge"></i> Dashboard</a></li>
+            <li><a href="POS.HTML" class="active"><i class="fa-solid fa-cart-shopping"></i> POS</a></li>
             <li><a href="items.html"><i class="fa-solid fa-boxes-stacked"></i> Items</a></li>
-            <li><a href="customers.html"><i class="fa-solid fa-users"></i> Customers</a></li>
-            <li><a href="shifts.html"><i class="fa-solid fa-clock-rotate-left"></i> Shifts</a></li>
-            <li><a href="expenses.html"><i class="fa-solid fa-wallet"></i> Expenses</a></li>
-            <li><a href="cash-drops.html"><i class="fa-solid fa-money-bill-transfer"></i> Cash Drops</a></li>
-            <li><a href="stock.html"><i class="fa-solid fa-cubes"></i> Stock</a></li>
-            <li><a href="adjustments.html"><i class="fa-solid fa-sliders"></i> Adjustments</a></li>
-            <li><a href="transfers.html"><i class="fa-solid fa-arrow-right-arrow-left"></i> Transfers</a></li>
-            <li><a href="reports.html"><i class="fa-solid fa-file-invoice"></i> Reports</a></li>
-            <li><a href="charts.html"><i class="fa-solid fa-chart-pie"></i> Charts</a></li>
+            <li><a href="Customer.html"><i class="fa-solid fa-users"></i> Customers</a></li>
+            <li><a href="chat.html"><i class="fa-solid fa-comments"></i> Chat</a></li>
+            <li><a href="index.html"><i class="fa-solid fa-right-from-bracket"></i> Login / Home</a></li>
         </ul>
     </div>
 
@@ -335,27 +329,8 @@
             </div>
 
             <div class="product-grid" id="product-grid">
-                <!-- Products dynamically rendered or clicked -->
-                <div class="product-card" onclick="addToCart('P101', 'Milk Powder 400g', 1150)">
-                    <h4>Milk Powder 400g</h4>
-                    <div class="price">LKR 1,150.00</div>
-                    <div class="code">Code: P101</div>
-                </div>
-                <div class="product-card" onclick="addToCart('P102', 'White Sugar 1kg', 320)">
-                    <h4>White Sugar 1kg</h4>
-                    <div class="price">LKR 320.00</div>
-                    <div class="code">Code: P102</div>
-                </div>
-                <div class="product-card" onclick="addToCart('P103', 'Tea Pack 200g', 450)">
-                    <h4>Tea Pack 200g</h4>
-                    <div class="price">LKR 450.00</div>
-                    <div class="code">Code: P103</div>
-                </div>
-                <div class="product-card" onclick="addToCart('P104', 'Samba Rice 5kg', 1100)">
-                    <h4>Samba Rice 5kg</h4>
-                    <div class="price">LKR 1,100.00</div>
-                    <div class="code">Code: P104</div>
-                </div>
+                <!-- Products dynamically rendered from Firebase -->
+                <p style="grid-column: 1/-1; text-align: center; color: #888;">Loading items...</p>
             </div>
         </div>
 
@@ -363,7 +338,7 @@
         <div class="cart-section">
             <div class="cart-header">
                 <h3><i class="fa-solid fa-cart-shopping"></i> Current Order</h3>
-                <button onclick="clearCart()" style="background:none; border:none; color:#e74c3c; cursor:pointer;"><i class="fa-solid fa-trash"></i> Clear</button>
+                <button id="btn-clear-cart" style="background:none; border:none; color:#e74c3c; cursor:pointer;"><i class="fa-solid fa-trash"></i> Clear</button>
             </div>
 
             <div class="cart-items" id="cart-items">
@@ -383,7 +358,7 @@
                     <span>Total</span>
                     <span id="total-val">LKR 0.00</span>
                 </div>
-                <button class="btn-pay" onclick="openPaymentModal()"><i class="fa-solid fa-print"></i> PAY & PRINT (Enter)</button>
+                <button class="btn-pay" id="btn-open-modal"><i class="fa-solid fa-print"></i> PAY & PRINT (Enter)</button>
             </div>
         </div>
     </div>
@@ -394,33 +369,77 @@
             <h3>Complete Payment</h3>
             <p>Total Due: <strong id="modal-total">LKR 0.00</strong></p>
             <input type="number" id="cash-given" placeholder="Enter Cash Amount" autofocus>
-            <button class="btn-pay" onclick="processCheckout()"><i class="fa-solid fa-check"></i> Print Receipt & Complete</button>
+            <button class="btn-pay" id="btn-process-checkout"><i class="fa-solid fa-check"></i> Print Receipt & Complete</button>
         </div>
     </div>
 
     <!-- Hidden Printable Receipt Area -->
     <div id="printable-receipt" style="display:none;">
-        <h3 style="text-align:center;">MY RETAIL SHOP</h3>
-        <p style="text-align:center;">No 123, Main Street, Colombo</p>
+        <h3 style="text-align:center;">DCK FOOTWEAR POS</h3>
+        <p style="text-align:center;">Main Store</p>
         <hr>
         <div id="receipt-body"></div>
         <hr>
         <p style="text-align:center;">Thank You! Come Again!</p>
     </div>
 
-    <script>
-        // Sample Product Database
-        const productsDB = [
-            { code: 'P101', name: 'Milk Powder 400g', price: 1150 },
-            { code: 'P102', name: 'White Sugar 1kg', price: 320 },
-            { code: 'P103', name: 'Tea Pack 200g', price: 450 },
-            { code: 'P104', name: 'Samba Rice 5kg', price: 1100 }
-        ];
+    <!-- Firebase Script -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
+        const firebaseConfig = {
+            apiKey: "AIzaSyC3xvmy4iXZ7B0ZbVjP2-ZoFuDcacg71F4",
+            authDomain: "dck-29351.firebaseapp.com",
+            projectId: "dck-29351",
+            storageBucket: "dck-29351.firebasestorage.app",
+            messagingSenderId: "577984877543",
+            appId: "1:577984877543:web:91f6a221eb4f7c85a2e342",
+            measurementId: "G-6YETC20HD3"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        let productsDB = [];
         let cart = [];
 
-        // Add Product to Cart
-        function addToCart(code, name, price) {
+        // 1. Fetch Realtime Products from Firestore "items" collection
+        const itemsRef = collection(db, "items");
+        onSnapshot(itemsRef, (snapshot) => {
+            productsDB = [];
+            const grid = document.getElementById('product-grid');
+            grid.innerHTML = '';
+
+            if (snapshot.empty) {
+                grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #888;">No products found in Firestore.</p>';
+                return;
+            }
+
+            snapshot.docs.forEach(doc => {
+                const data = doc.data();
+                const item = {
+                    id: doc.id,
+                    code: data.code || doc.id.substring(0, 6).toUpperCase(),
+                    name: data.name || 'Unnamed Item',
+                    price: Number(data.price) || 0
+                };
+                productsDB.push(item);
+
+                const card = document.createElement('div');
+                card.className = 'product-card';
+                card.onclick = () => addToCart(item.code, item.name, item.price);
+                card.innerHTML = `
+                    <h4>${item.name}</h4>
+                    <div class="price">LKR ${item.price.toFixed(2)}</div>
+                    <div class="code">Code: ${item.code}</div>
+                `;
+                grid.appendChild(card);
+            });
+        });
+
+        // 2. Cart Functions
+        window.addToCart = function(code, name, price) {
             let existing = cart.find(item => item.code === code);
             if (existing) {
                 existing.qty++;
@@ -428,9 +447,8 @@
                 cart.push({ code, name, price, qty: 1 });
             }
             renderCart();
-        }
+        };
 
-        // Render Cart Items
         function renderCart() {
             const container = document.getElementById('cart-items');
             container.innerHTML = '';
@@ -460,64 +478,97 @@
             document.getElementById('modal-total').innerText = `LKR ${total.toFixed(2)}`;
         }
 
-        function updateQty(index, change) {
+        window.updateQty = function(index, change) {
             cart[index].qty += change;
             if (cart[index].qty <= 0) cart.splice(index, 1);
             renderCart();
-        }
+        };
 
         function clearCart() {
             cart = [];
             renderCart();
         }
+        document.getElementById('btn-clear-cart').addEventListener('click', clearCart);
 
-        // Barcode Scanner & Enter Key Handling
+        // 3. Search & Barcode Logic
         document.getElementById('barcode-input').addEventListener('keypress', function (e) {
             if (e.key === 'Enter') {
                 e.preventDefault();
-                let val = this.value.trim();
-                let found = productsDB.find(p => p.code.toLowerCase() === val.toLowerCase() || p.name.toLowerCase().includes(val.toLowerCase()));
+                let val = this.value.trim().toLowerCase();
+                let found = productsDB.find(p => p.code.toLowerCase() === val || p.name.toLowerCase().includes(val));
                 if (found) {
                     addToCart(found.code, found.name, found.price);
                     this.value = '';
                 } else {
-                    alert('Product not found!');
+                    alert('Product not found in Database!');
                 }
             }
         });
 
-        // Payment Modal Handling
-        function openPaymentModal() {
+        // 4. Modal Handlers
+        document.getElementById('btn-open-modal').addEventListener('click', () => {
             if (cart.length === 0) return alert('Cart is empty!');
             document.getElementById('payment-modal').style.display = 'flex';
             document.getElementById('cash-given').focus();
+        });
+
+        // 5. Checkout & Add Order to Firebase "orders" collection
+        async function processCheckout() {
+            if (cart.length === 0) return;
+
+            let total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+            let cashGiven = Number(document.getElementById('cash-given').value) || total;
+            let change = cashGiven - total;
+
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const invoiceNo = 'INV-' + Date.now().toString().slice(-6);
+
+            // Firestore Object Creation
+            const orderData = {
+                invoiceNo: invoiceNo,
+                totalAmount: total,
+                cashGiven: cashGiven,
+                change: change,
+                items: cart,
+                status: "Completed",
+                time: timeStr,
+                createdAt: now
+            };
+
+            try {
+                // Save Order to Firebase Database
+                await addDoc(collection(db, "orders"), orderData);
+
+                // Print Receipt Logic
+                let receiptContent = `<p>Invoice: ${invoiceNo}</p><p>Time: ${timeStr}</p><hr>`;
+                cart.forEach(item => {
+                    let itemTotal = item.price * item.qty;
+                    receiptContent += `<p>${item.name} x ${item.qty} = LKR ${itemTotal.toFixed(2)}</p>`;
+                });
+                receiptContent += `<h4>TOTAL: LKR ${total.toFixed(2)}</h4>`;
+                receiptContent += `<p>Cash Paid: LKR ${cashGiven.toFixed(2)}</p>`;
+                receiptContent += `<p>Change: LKR ${change.toFixed(2)}</p>`;
+                
+                document.getElementById('receipt-body').innerHTML = receiptContent;
+                document.getElementById('printable-receipt').style.display = 'block';
+                window.print();
+                document.getElementById('printable-receipt').style.display = 'none';
+
+                // Cleanup UI
+                document.getElementById('payment-modal').style.display = 'none';
+                document.getElementById('cash-given').value = '';
+                clearCart();
+                document.getElementById('barcode-input').focus();
+
+            } catch (error) {
+                console.error("Error saving order: ", error);
+                alert("Order failed to save in Firebase: " + error.message);
+            }
         }
 
-        // Auto-Print Receipt & Finalize Sale
-        function processCheckout() {
-            let receiptContent = '';
-            let total = 0;
+        document.getElementById('btn-process-checkout').addEventListener('click', processCheckout);
 
-            cart.forEach(item => {
-                let itemTotal = item.price * item.qty;
-                total += itemTotal;
-                receiptContent += `<p>${item.name} x ${item.qty} = LKR ${itemTotal.toFixed(2)}</p>`;
-            });
-
-            receiptContent += `<h4>TOTAL: LKR ${total.toFixed(2)}</h4>`;
-            document.getElementById('receipt-body').innerHTML = receiptContent;
-
-            document.getElementById('printable-receipt').style.display = 'block';
-            window.print(); // Auto Trigger Printer
-            document.getElementById('printable-receipt').style.display = 'none';
-
-            // Reset after printing
-            document.getElementById('payment-modal').style.display = 'none';
-            clearCart();
-            document.getElementById('barcode-input').focus();
-        }
-
-        // Allow Enter key inside payment modal to trigger print
         document.getElementById('cash-given').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 processCheckout();
